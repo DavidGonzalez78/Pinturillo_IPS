@@ -1,0 +1,7 @@
+
+
+- Millorar la frase del chatgtp
+
+- Lloc amb informació per qui no s'enteri. 
+
+- Botón para ocultar el texto de lo que tienes que dibujar para que no te espíen. 
