@@ -3,21 +3,26 @@ from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 from urllib.parse import urlsplit
 from openai import AzureOpenAI
+import streamlit as st
+
 
 class QuoteGenerator:
 
     def __init__(self):
-            self.config_path = Path("aircall_agent_config.json")
+
             self.config = json.loads(self.config_path.read_text(encoding="utf-8"))
 
-            foundry_cfg = self.config.get("azure_foundry")
+            foundry_cfg = st.secrets["azure_foundry"]
             if not isinstance(foundry_cfg, dict):
                 foundry_cfg = {}
 
-            self.foundry_endpoint = self._normalize_foundry_endpoint(str(foundry_cfg.get("endpoint", "")).strip())
-            self.foundry_api_key = str(foundry_cfg.get("api_key", "")).strip()
-            self.foundry_model = str(foundry_cfg.get("model", "")).strip()
-            self.foundry_api_version = str(foundry_cfg.get("api_version", "2024-10-21")).strip()
+            self.foundry_endpoint = self._normalize_foundry_endpoint(str(st.secrets["azure_foundry"]["endpoint"]).strip())
+            self.foundry_api_key = str(st.secrets["azure_foundry"]["api_key"]).strip()
+            self.foundry_model = str(st.secrets["azure_foundry"]["model"]).strip()
+            if "api_version" in foundry_cfg:
+                self.foundry_api_version = foundry_cfg["api_version"]
+            else:
+                self.foundry_api_version = "2024-10-21"
 
             self.client = AzureOpenAI(api_key=self.foundry_api_key, api_version=self.foundry_api_version, azure_endpoint=self.foundry_endpoint)
 
