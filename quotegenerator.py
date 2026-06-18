@@ -10,7 +10,7 @@ class QuoteGenerator:
 
     def __init__(self):
 
-            self.config = json.loads(self.config_path.read_text(encoding="utf-8"))
+            #self.config = json.loads(self.config_path.read_text(encoding="utf-8"))
 
             foundry_cfg = st.secrets["azure_foundry"]
             if not isinstance(foundry_cfg, dict):
