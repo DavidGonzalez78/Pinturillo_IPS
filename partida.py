@@ -1,9 +1,7 @@
 from quotegenerator import QuoteGenerator
 from matcher import Matcher
 import pandas as pd
-import os
 import json
-import pickle
 from datetime import datetime
 from pathlib import Path
 

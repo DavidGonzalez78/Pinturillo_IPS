@@ -1,8 +1,6 @@
 import streamlit as st
 from partida import Partida
 from streamlit_drawable_canvas import st_canvas
-import time
-import pickle
 from datetime import datetime
 from quotegenerator import QuoteGenerator
 
