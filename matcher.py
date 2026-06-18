@@ -131,7 +131,7 @@ class Matcher:
 class EmbeddingsManager: 
 
     def __init__(self): 
-        self.embeddings_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+        self.embeddings_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
     def compute_embedding(self, word:str, use_cache: bool=True): 
