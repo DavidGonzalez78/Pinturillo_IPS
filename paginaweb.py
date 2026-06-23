@@ -5,6 +5,8 @@ from datetime import datetime
 from quotegenerator import QuoteGenerator
 import create_pdf
 import warnings
+import psutil
+import os
 warnings.filterwarnings("ignore")
 
 # Esto solo se hace una vez, al principio. Además, es global para todos los ordenadores que se conecten
@@ -21,8 +23,6 @@ quote_generator = get_quote_generator()
 
 
 
-
-
 # Esta variable es propia de cada ordenador/usuario, y describe la fase en la que están jugando (seleccionar partida, dibujar, adivinar)
 if not "user_phase" in st.session_state: st.session_state.user_phase = "Select partida"
 if not "user_name" in st.session_state: st.session_state.user_name = ""
@@ -31,9 +31,15 @@ if not "show_drawing_quote" in st.session_state: st.session_state.show_drawing_q
 
 
 
-st.title("Joc d'endevinar dibuixets") 
+st.title("Joc de Pinturillo IPS") 
 st.session_state.user_name = st.text_input("Introdueix el teu nom")
-#st.write(f"Jugant com a {st.session_state.user_name} a la partida {st.session_state.user_partida} a la fase {st.session_state.user_phase} ")
+
+
+
+proceso = psutil.Process(os.getpid())
+memoria_mb = proceso.memory_info().rss / 1024 / 1024
+st.sidebar.metric("Memoria usada", f"{memoria_mb:.1f} MB")
+st.write(f"Jugant com a {st.session_state.user_name} a la partida {st.session_state.user_partida} a la fase {st.session_state.user_phase}. Usando {memoria_mb:.1f}/1024 MB de memoria")
 st.divider()
 
 

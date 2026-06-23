@@ -11,3 +11,4 @@ torchvision
 reportlab
 Pillow
 numpy
+psutil
