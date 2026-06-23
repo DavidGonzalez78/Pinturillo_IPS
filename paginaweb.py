@@ -3,10 +3,12 @@ from partida import Partida
 from streamlit_drawable_canvas import st_canvas
 from datetime import datetime
 from quotegenerator import QuoteGenerator
+from matcher import Matcher
 import create_pdf
 import warnings
 import psutil
 import os
+import sys
 warnings.filterwarnings("ignore")
 
 # Esto solo se hace una vez, al principio. Además, es global para todos los ordenadores que se conecten
@@ -17,9 +19,9 @@ partidas:list[Partida] = generate_null_partidas_list()
 
 
 @st.cache_resource
-def get_quote_generator():
-    return QuoteGenerator()
-quote_generator = get_quote_generator()
+def get_quote_generator_and_matcher():
+    return QuoteGenerator(), Matcher()
+quote_generator, matcher = get_quote_generator_and_matcher()
 
 
 
@@ -30,15 +32,22 @@ if not "user_partida" in st.session_state: st.session_state.user_partida = None
 if not "show_drawing_quote" in st.session_state: st.session_state.show_drawing_quote = True
 
 
-
+# Título e introducir usuario
 st.title("Joc de Pinturillo IPS") 
 st.session_state.user_name = st.text_input("Introdueix el teu nom")
 
-
-
+#Debug, mostrar memoria usada y datos
 proceso = psutil.Process(os.getpid())
 memoria_mb = proceso.memory_info().rss / 1024 / 1024
 st.sidebar.metric("Memoria usada", f"{memoria_mb:.1f} MB")
+st.sidebar.write("Memoria máxima: 1024 MB")
+
+for i, partida in enumerate(partidas):
+    tam = sys.getsizeof(partida)
+    if hasattr(partida, 'drawing') and hasattr(partida.drawing, 'image_data'):
+        tam += partida.drawing.image_data.nbytes
+    st.sidebar.write(f"Partida {i}: {tam / 1024 / 1024:.2f} MB")
+
 st.write(f"Jugant com a {st.session_state.user_name} a la partida {st.session_state.user_partida} a la fase {st.session_state.user_phase}. Usando {memoria_mb:.1f}/1024 MB de memoria")
 st.divider()
 
@@ -53,7 +62,7 @@ if st.session_state.user_name:
 
         with col1: 
             if st.button("Crear partida"): 
-                partidas.append(Partida(quote_generator))
+                partidas.append(Partida(quote_generator, matcher))
         
         with col2: 
             if st.button("Refrescar"): 
@@ -115,19 +124,18 @@ if st.session_state.user_name:
             veure_partides = st.button("Veure partides anteriors...")
 
         with col2: 
-            if st.button("Descarregar PDF amb les partides (preparar)"):
+            if st.button("Preparar descàrrega de partides acabades"):
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 pdf = create_pdf.generar_pdf_partides(partidas)
 
                 st.download_button(
-                    label="Descarregar PDF amb les partides",
+                    label="Descarregar PDF",
                     data=pdf,
                     file_name=f"historial_partides_{timestamp}.pdf",
                     mime="application/pdf"
                 )
-                
-                
+
 
         if veure_partides: 
             for i, partida in enumerate(partidas): # Por cada partida abierta, colocas un objeto que la representa (como un botón para unirte)

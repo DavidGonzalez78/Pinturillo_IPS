@@ -1,3 +1,5 @@
+USE_EMBEDDINGS = False #Cuando es falso, la medida de embeddings_score vale siempre 1
+
 import json
 import logging
 import os
@@ -13,14 +15,14 @@ import numpy as np
 import re
 from pathlib import Path
 
-
-import warnings
-import logging
-warnings.filterwarnings("ignore", message="Accessing `__path__`")
-logging.getLogger("transformers").setLevel(logging.ERROR)
-from sentence_transformers import SentenceTransformer, util
-import warnings
-warnings.filterwarnings("ignore")
+if USE_EMBEDDINGS: 
+    import warnings
+    import logging
+    warnings.filterwarnings("ignore", message="Accessing `__path__`")
+    logging.getLogger("transformers").setLevel(logging.ERROR)
+    from sentence_transformers import SentenceTransformer, util
+    import warnings
+    warnings.filterwarnings("ignore")
 
 
 
@@ -40,14 +42,14 @@ class Matcher:
             "token_sort_score", "partial_ratio_score", "jaro_winkler_score"
         ]
         
-        self.emb = EmbeddingsManager()
+        if USE_EMBEDDINGS: self.emb = EmbeddingsManager()
     
 
     def quote_match(self, real_quote:str, guessed_quote:str): 
 
         scores =  {
             "common words": self.token_sort_score(real_quote, guessed_quote),
-            "semantic": self.embeddings_score(real_quote, guessed_quote),
+            "semantic": 1 if not USE_EMBEDDINGS else self.embeddings_score(real_quote, guessed_quote),
             "phonetic": self.metaphone_score(real_quote, guessed_quote),
             "levenstein": self.levenstein_score(real_quote, guessed_quote),
         }
@@ -79,11 +81,13 @@ class Matcher:
         '''Mide la similitud semántica mediante embeddings. Cuando recalculate_transc_embedding es True, recalcula el embedding del texto "transcripted_text" y lo guarda en self.transc_emb. Altramente, reutiliza el 
         embedding calculado anteriormente. Es útil para no tener que estar recalculándolo todo el rato.'''
 
-        self.transc_emb = self.emb.compute_embedding(transcripted_text, use_cache=False)
-        official_emb = self.emb.compute_embedding(official_text, use_cache=True)
-        similitud = util.cos_sim(self.transc_emb, official_emb).item()
+        if USE_EMBEDDINGS: 
+            self.transc_emb = self.emb.compute_embedding(transcripted_text, use_cache=False)
+            official_emb = self.emb.compute_embedding(official_text, use_cache=True)
+            similitud = util.cos_sim(self.transc_emb, official_emb).item()
 
-        return similitud
+            return similitud
+        return 1
 
 
     def metaphone_score(self, transcripted_text: str, official_text: str, ) -> float:
@@ -128,18 +132,18 @@ class Matcher:
 
 
 
+if USE_EMBEDDINGS: 
+    class EmbeddingsManager: 
 
-class EmbeddingsManager: 
-
-    def __init__(self): 
-        self.embeddings_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        def __init__(self): 
+            self.embeddings_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 
 
-    def compute_embedding(self, word:str, use_cache: bool=True): 
-        '''Calcula el embedding de una palabra. Cuando use_cache es True, busca si ya lo había calculado antes en la cache para evitar recalcularlo, y si no lo está, lo calcula y también lo guarda en la cache. 
-        Si use_cache es False, lo calcula directamente sin interactuar con la cache.'''
+        def compute_embedding(self, word:str, use_cache: bool=True): 
+            '''Calcula el embedding de una palabra. Cuando use_cache es True, busca si ya lo había calculado antes en la cache para evitar recalcularlo, y si no lo está, lo calcula y también lo guarda en la cache. 
+            Si use_cache es False, lo calcula directamente sin interactuar con la cache.'''
 
-        return self.embeddings_model.encode(word, convert_to_tensor=True).tolist()
+            return self.embeddings_model.encode(word, convert_to_tensor=True).tolist()
 
 
 

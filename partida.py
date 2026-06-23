@@ -8,13 +8,13 @@ from pathlib import Path
 
 class Partida: 
 
-    def __init__(self, quote_generator): 
+    def __init__(self, quote_generator, matcher): 
 
         self.player1 = None
         self.player2 = None
         self.blocked = False
         self.quote_generator = quote_generator
-        self.matcher = Matcher()
+        self.matcher = matcher
         self.ending = "" #Vale "won" o "lost" según si lo descubrió o no. 
 
         self.phase = "Choose quote" # "Choose quote", "Make drawing", "Make guess", "Finished"
