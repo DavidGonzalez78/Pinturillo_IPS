@@ -15,6 +15,7 @@ class Partida:
         self.blocked = False
         self.quote_generator = quote_generator
         self.matcher = Matcher()
+        self.ending = "" #Vale "won" o "lost" según si lo descubrió o no. 
 
         self.phase = "Choose quote" # "Choose quote", "Make drawing", "Make guess", "Finished"
 
@@ -71,6 +72,7 @@ class Partida:
             if won: 
                 self.player2 = player2
                 self.phase = "Finished"
+                self.ending = "won"
             
             self.guessed_quotes = pd.concat(
                 [scores, self.guessed_quotes],
@@ -140,3 +142,9 @@ class Partida:
                     f.write(self.drawing)
 
         return str(partida_dir)
+
+
+
+def create_zip(partidas): 
+    '''Recibe una lista de partidas y genera un archivo zip con los datos de todas para guardar. '''
+    ...

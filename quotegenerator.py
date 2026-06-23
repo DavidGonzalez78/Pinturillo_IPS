@@ -4,6 +4,8 @@ from typing import Any, Callable, TYPE_CHECKING
 from urllib.parse import urlsplit
 from openai import AzureOpenAI
 import streamlit as st
+import unicodedata
+
 
 
 class QuoteGenerator:
@@ -41,7 +43,7 @@ class QuoteGenerator:
         #Las prompts que va a recibir el modelo
         system_prompt = (
             "Te encargas de generar escenas cortas (de entre 4 a 10 palabras) para un juego donde un jugador tendrá que dibujar la escena y el otro adivinarla. " \
-            "Tienen que ser escenas visuales, dibujables, pero un poco complejas. Algunas ideas de cosas que pueden incluir: " \
+            "Tienen que ser escenas visuales, dibujables, pero un poco complejas. No uses comas ni puntos, tampoco comillas. Algunas ideas de cosas que pueden incluir: " \
             " - Emociones, frutas y verduras animadas, animales divertidos, elementos de una oficina, cosas relacionadas con programación y data science. " \
             " - Sería especialmente divertido si nos mencionaras a nosotros, que nos llamamos Alba, David, Arnau, Jan, Manuel, Josep, Francesc, Mayra, Sam, Naranja diabolica, y a nuestra empresa de máquinas recreativas llamada IPS "
             " - Cosas o sitios que puedes encontrar en Barcelona o España. Cosas de nuestra oficina, como cafe, churros, tazas, tuppers, cascos, etc." \
@@ -63,6 +65,7 @@ class QuoteGenerator:
 
         # `response.choices[0].message.content` es un string con el resultado del LLM. Ahora lo transforman a un diccionario en el formato parseado correcto y lo devuelven
         content = (response.choices[0].message.content or "").strip()
+        content = self.limpiar_texto(content)
 
         # Guardar en el archivo "previous_quotes.txt"
         with open("previous_quotes.txt", "a", encoding="utf-8") as f:
@@ -70,7 +73,22 @@ class QuoteGenerator:
         self.previous_quotes.append(content)
 
         return content
-    
+
+
+    @staticmethod
+    def limpiar_texto(content):
+        # Quitar acentos y diéresis
+        content = unicodedata.normalize("NFD", content)
+        content = "".join(c for c in content if unicodedata.category(c) != "Mn")
+        
+        # Minúsculas
+        content = content.lower()
+        
+        # Quitar caracteres no deseados
+        content = content.replace('"', '').replace("'", '').replace(',', '').replace('.', '')
+        
+        return content
+        
 
 
     @staticmethod

@@ -51,7 +51,7 @@ if st.session_state.user_name:
                 st.rerun(scope = "app")
         
         with col3: 
-            if st.button("Guardar partides"): 
+            if st.button("Guardar partides (no funciona)"): 
                 for i, partida in enumerate(partidas): 
                     partida.save(save_dir = "partidas_guardadas", index = i)
 
@@ -63,37 +63,59 @@ if st.session_state.user_name:
             blocked = partida.blocked
             player1, player2 = partida.player1, partida.player2
             
+            # Botó per entrar a una partida i dibuixar
             if phase == "Make drawing" and not blocked: 
                 text = f"{i+1}. Partida sense començar. Fes un dibuix! "
                 if st.button(text): 
                     st.session_state.user_phase = "Drawing"
                     st.session_state.user_partida = partida
+                    st.session_state.user_partida.player1 = st.session_state.user_name
                     st.session_state.user_partida.block()
                     st.rerun()
             
+            # Botó per entrar a una partida i endevinar
             if phase == "Make guess" and not blocked: 
                 text = f"{i+1}. Partida començada, amb dibuix fet per {player1}. Endevina!"
                 if st.button(text): 
                     if player1 != st.session_state.user_name: 
                         st.session_state.user_phase = "Guessing"
                         st.session_state.user_partida = partida
+                        st.session_state.user_partida.player2 = st.session_state.user_name
                         st.session_state.user_partida.block()
                         st.rerun()
                     else: 
                         st.write("Ja has jugat en aquesta partida! Li toca a un altre.")
             
+            # Botons per a partides bloquejades o acabades
             if phase == "Make drawing" and blocked: 
                 text = f"{i+1}. Partida començada, {player1} està dibuixant (no pots entrar)"
+                st.warning(text)
             
             if phase == "Make guess" and blocked: 
                 text = f"{i+1}. Partida començada, {player2} està endevinant (no pots entrar)"
+                st.warning(text)
 
             if phase == "Finished": 
-                text = f"{i+1}. Partida acabada entre {player1} i {player2} amb {len(partida.guessed_quotes)} intents"
+                if partida.ending == "won": text = f"{i+1}. Partida acabada entre {player1} i {player2} amb {len(partida.guessed_quotes)} intents"
+                else: text = f"{i+1}. Partida acabada entre {player1} i {player2}, i {player2} s'ha rendit"
                 st.info(text)
 
-        #time.sleep(1)
-        #st.rerun()
+        
+        st.divider()
+        if st.button("Veure partides anteriors..."): 
+
+            for i, partida in enumerate(partidas): # Por cada partida abierta, colocas un objeto que la representa (como un botón para unirte)
+
+                phase = partida.phase
+                ending = partida.ending
+                player1, player2 = partida.player1, partida.player2
+
+                if phase == "Finished": 
+                    t = "(i ho va aconseguir)" if ending=="won" else "(però no ho va aconseguir)"
+                    st.subheader(f"Partida {i}, on {player1} va dibuixar i {player2} va endevinar " + t )
+                    st.warning(f"Text: {partida.quote}")
+                    st.image(  partida.drawing.image_data  )
+                    st.dataframe(partida.guessed_quotes)
 
 
 
@@ -142,6 +164,7 @@ if st.session_state.user_name:
             
 
 
+
     if st.session_state.user_phase == "Guessing": 
 
         st.header("Endevina el dibuix! ")
@@ -150,8 +173,8 @@ if st.session_state.user_name:
 
         guessed_quote = st.text_input("Introdueix la teva proposta: ")
 
-
-        col1, col2 = st.columns(2)
+        show_solucio = False
+        col1, col2, col3 = st.columns(3)
 
         with col1: 
             if st.button("Enviar proposta"): 
@@ -168,6 +191,17 @@ if st.session_state.user_name:
                 st.session_state.user_partida.unblock()
                 st.session_state.user_phase = "Select partida"
                 st.rerun()
+        
+
+        with col3: 
+            if len(st.session_state.user_partida.guessed_quotes) <= 30:
+                pass
+            else: 
+                if st.button("Veure solució"): 
+                    show_solucio = True
+        
+        if show_solucio: 
+            st.warning(f"La solució és: {st.session_state.user_partida.quote}")              
         
 
         if len(st.session_state.user_partida.guessed_quotes) > 0:
