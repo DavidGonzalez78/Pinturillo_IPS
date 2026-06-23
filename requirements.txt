@@ -9,3 +9,5 @@ rapidfuzz
 safetensors
 torchvision
 reportlab
+Pillow
+numpy
