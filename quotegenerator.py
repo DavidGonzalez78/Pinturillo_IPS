@@ -36,7 +36,7 @@ class QuoteGenerator:
 
 
 
-    def generate_quote(self): 
+    def generate_quote(self, debug_print=True): 
         # Crear cliente de Foundry
         
 
@@ -45,13 +45,15 @@ class QuoteGenerator:
             "Te encargas de generar escenas cortas (de entre 4 a 10 palabras) para un juego donde un jugador tendrá que dibujar la escena y el otro adivinarla. " \
             "Tienen que ser escenas visuales, dibujables, pero un poco complejas. No uses comas ni puntos, tampoco comillas. Algunas ideas de cosas que pueden incluir: " \
             " - Emociones, frutas y verduras animadas, animales divertidos, elementos de una oficina, cosas relacionadas con programación y data science. " \
-            " - Sería especialmente divertido si nos mencionaras a nosotros, que nos llamamos Alba, David, Arnau, Jan, Manuel, Josep, Francesc, Mayra, Sam, Naranja diabolica, y a nuestra empresa de máquinas recreativas llamada IPS "
-            " - Cosas o sitios que puedes encontrar en Barcelona o España. Cosas de nuestra oficina, como cafe, churros, tazas, tuppers, cascos, etc." \
+            " - Mencionaras a nosotros, que nos llamamos Alba, David, Arnau, Jan, Manuel, Josep, Francesc, Mayra, Sam, Naranja diabolica, y a nuestra empresa de máquinas recreativas llamada IPS "
+            " - Cosas o sitios que puedes encontrar en Barcelona o España. Cosas de nuestra oficina, como maquinas recreativas, cafe, churros, tazas, tuppers, cascos, etc." \
             " - No tiene que ser siempre así, se te pueden ocurrir más cosas random, las que quieras, desde piratas, astronautas o bandidos, playeros, o mucho más, mientras más diversidad mejor. " \
-            " - No digas todo el rato un mismo concepto, escoge aleatoriamente (por ejemplo no hagas todas las frases con la naranja diabólica). " \
-            f"No seas muy repetitivo, evita ideas parecidas a las de escenas anteriores, algunas de las últimas escenas que generaste fueron estas: {self.previous_quotes[-20:]}"
+            " - No digas todo el rato un mismo concepto, escoge aleatoriamente (por ejemplo no hagas todas las frases con la naranja diabólica, churros o ips). " \
+            f"Evita repetir ideas parecidas a estas escenas anteriores: {self.previous_quotes[-10:]}"
         )
-        user_prompt = """Genera una escena para dibujar. Solamente una. """
+        user_prompt = """Genera una sola escena para dibujar. """
+
+        if debug_print: print("\nGENERATING QUOTE. THIS IS THE PROMPT: \n " + system_prompt + "\n")
 
         # Conectarse con el modelo, enviarle las prompts y obtener la respuesta
         response = self.client.chat.completions.create(

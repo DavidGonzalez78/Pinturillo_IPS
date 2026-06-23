@@ -3,6 +3,9 @@ from partida import Partida
 from streamlit_drawable_canvas import st_canvas
 from datetime import datetime
 from quotegenerator import QuoteGenerator
+import create_pdf
+import warnings
+warnings.filterwarnings("ignore")
 
 # Esto solo se hace una vez, al principio. Además, es global para todos los ordenadores que se conecten
 @st.cache_resource
@@ -30,7 +33,7 @@ if not "show_drawing_quote" in st.session_state: st.session_state.show_drawing_q
 
 st.title("Joc d'endevinar dibuixets") 
 st.session_state.user_name = st.text_input("Introdueix el teu nom")
-st.write(f"Jugant com a {st.session_state.user_name} a la partida {st.session_state.user_partida} a la fase {st.session_state.user_phase} ")
+#st.write(f"Jugant com a {st.session_state.user_name} a la partida {st.session_state.user_partida} a la fase {st.session_state.user_phase} ")
 st.divider()
 
 
@@ -40,7 +43,7 @@ if st.session_state.user_name:
     if st.session_state.user_phase == "Select partida": 
         
         st.header("Selecciona la partida")
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1: 
             if st.button("Crear partida"): 
@@ -50,10 +53,6 @@ if st.session_state.user_name:
             if st.button("Refrescar"): 
                 st.rerun(scope = "app")
         
-        with col3: 
-            if st.button("Guardar partides (no funciona)"): 
-                for i, partida in enumerate(partidas): 
-                    partida.save(save_dir = "partidas_guardadas", index = i)
 
         st.write("Partides disponibles: ")
 
@@ -101,9 +100,30 @@ if st.session_state.user_name:
                 st.info(text)
 
         
-        st.divider()
-        if st.button("Veure partides anteriors..."): 
 
+
+        st.divider()
+        col1, col2 = st.columns(2)
+        
+        with col1: 
+            veure_partides = st.button("Veure partides anteriors...")
+
+        with col2: 
+            if st.button("Descarregar PDF amb les partides (preparar)"):
+
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                pdf = create_pdf.generar_pdf_partides(partidas)
+
+                st.download_button(
+                    label="Descarregar PDF amb les partides",
+                    data=pdf,
+                    file_name=f"historial_partides_{timestamp}.pdf",
+                    mime="application/pdf"
+                )
+                
+                
+
+        if veure_partides: 
             for i, partida in enumerate(partidas): # Por cada partida abierta, colocas un objeto que la representa (como un botón para unirte)
 
                 phase = partida.phase
@@ -194,7 +214,7 @@ if st.session_state.user_name:
         
 
         with col3: 
-            if len(st.session_state.user_partida.guessed_quotes) <= 30:
+            if len(st.session_state.user_partida.guessed_quotes) <= 3: #30:
                 pass
             else: 
                 if st.button("Veure solució"): 

@@ -19,7 +19,8 @@ import logging
 warnings.filterwarnings("ignore", message="Accessing `__path__`")
 logging.getLogger("transformers").setLevel(logging.ERROR)
 from sentence_transformers import SentenceTransformer, util
-
+import warnings
+warnings.filterwarnings("ignore")
 
 
 

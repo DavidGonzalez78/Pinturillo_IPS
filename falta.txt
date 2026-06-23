@@ -1,7 +1,5 @@
 
 
-- Quitar las comillas y acentos y comas y puntos del chatgtp. 
+- Ver toda la mierda del image processing esto de que esto
 
-- Hacer que si llevas mas de 30 intentos te diga cuál era la respuesta correcta
-
-- Sitio para ver partidas anteriores. O sea, donde pone partida acabada, que puedas entrar y ver el dibujo y qué se adivinó. 
+- Que no diga siempre la miema mierda de quotes
