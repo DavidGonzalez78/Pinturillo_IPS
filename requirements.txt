@@ -8,3 +8,4 @@ metaphone
 rapidfuzz
 safetensors
 torchvision
+reportlab
